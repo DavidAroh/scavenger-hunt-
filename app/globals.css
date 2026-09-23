@@ -93,6 +93,49 @@ body {
     background-size: 32px 32px;
   }
 
+  /* A parchment waypoint map, kept within the existing RIL dark/blue/green palette. */
+  .treasure-map {
+    @apply border-3 border-paper/50 bg-[#292a27] p-4;
+  }
+  .treasure-map__land {
+    overflow: hidden;
+    border: 2px solid #b99c68;
+    background: #e8d7ad;
+  }
+  .treasure-map__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .treasure-map__current {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: map-pulse 1.8s steps(5, end) infinite;
+  }
+  .treasure-map__key {
+    display: inline-grid;
+    width: 1rem;
+    height: 1rem;
+    place-items: center;
+    border: 2px solid #212120;
+    border-radius: 50%;
+    color: #fff;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .treasure-map__key--found {
+    background: #177ae5;
+  }
+  .treasure-map__key--current {
+    background: #29cc6e;
+  }
+  .treasure-map__key--ahead {
+    background: #f5edda;
+    color: #62573f;
+  }
+
   .cursor-blink {
     animation: blink 1s steps(1) infinite;
   }
@@ -133,6 +176,12 @@ body {
   }
   to {
     background-position: 140% 0;
+  }
+}
+
+@keyframes map-pulse {
+  50% {
+    transform: scale(1.12);
   }
 }
 

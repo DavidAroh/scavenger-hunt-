@@ -7,6 +7,7 @@ import { advanceAction } from "@/app/play/actions";
 import { BracketFrame } from "../ui";
 import { ENTER } from "@/lib/motion";
 import { RevealSequence } from "./RevealSequence";
+import { ProgressBlocks } from "../ProgressBlocks";
 
 type NarrativeView = Extract<StageView, { kind: "narrative" }>;
 
@@ -19,7 +20,7 @@ function ContinueButton({ cta }: { cta: string }) {
   );
 }
 
-export function NarrativeStage({ stage }: { stage: NarrativeView }) {
+export function NarrativeStage({ stage, total }: { stage: NarrativeView; total: number }) {
   // Rival beats (and the reveal) wear the adversary's colour.
   const rival = stage.tone === "rival" || stage.effect === "reveal";
 
@@ -49,6 +50,8 @@ export function NarrativeStage({ stage }: { stage: NarrativeView }) {
           <ContinueButton cta={stage.cta} />
         </BracketFrame>
       </form>
+
+      <ProgressBlocks done={stage.index} total={total} />
     </motion.div>
   );
 

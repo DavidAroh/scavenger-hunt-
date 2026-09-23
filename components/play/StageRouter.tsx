@@ -19,7 +19,7 @@ export function StageRouter({
     return <FinishView result={state.result} firstName={firstName} prize={prize} />;
   }
   if (state.stage.kind === "narrative") {
-    return <NarrativeStage stage={state.stage} />;
+    return <NarrativeStage stage={state.stage} total={state.total} />;
   }
   if (state.stage.kind === "timed") {
     return <TimedStage stage={state.stage} total={state.total} />;
