@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+html {
+  background: #212120;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  @apply bg-ink text-paper font-sans antialiased;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+::selection {
+  background: #177ae5;
+  color: #fff;
+}
+:focus-visible {
+  outline: 3px solid #29cc6e;
+  outline-offset: 3px;
+}
+
+@layer components {
+  /* type */
+  .label {
+    @apply font-semibold uppercase text-[11px] tracking-label;
+  }
+  .display {
+    @apply font-bold tracking-tight leading-[1.05];
+    font-size: clamp(2.25rem, 9vw, 3.5rem);
+  }
+
+  /* surfaces */
+  .panel {
+    @apply border-3 border-paper bg-ink;
+  }
+
+  /* buttons: hard shadow, press = slam into the shadow */
+  .btn {
+    @apply inline-flex items-center justify-center whitespace-nowrap gap-3 min-h-[52px] px-6 font-bold border-3 border-paper text-[1.2rem] leading-none select-none cursor-pointer;
+    box-shadow: 6px 6px 0 0 var(--shadow, #ffffff);
+    transition: transform 80ms linear, box-shadow 80ms linear;
+  }
+  .btn:active {
+    transform: translate(6px, 6px);
+    box-shadow: 0 0 0 0 var(--shadow, #ffffff);
+  }
+  .btn:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+  .btn-blue {
+    @apply bg-blue text-paper;
+    --shadow: #ffffff;
+  }
+  .btn-paper {
+    @apply bg-paper text-ink;
+    --shadow: #177ae5;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-paper;
+    --shadow: #177ae5;
+  }
+
+  /* form controls */
+  .field {
+    @apply w-full min-h-[52px] bg-ink text-paper border-3 border-paper px-4 text-[16px] placeholder:text-fog-400;
+    border-radius: 0;
+  }
+  .field:focus {
+    @apply border-green outline-none;
+    box-shadow: 4px 4px 0 0 #29cc6e;
+  }
+
+  /* brand patterns (kit: halftone dots, chevrons, diagonal stripes) */
+  .pattern-stripes {
+    background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0 2px, transparent 2px 8px);
+  }
+  .pattern-dots {
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.35) 1.5px, transparent 1.6px);
+    background-size: 14px 14px;
+  }
+  .pattern-chevrons {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='20'%3E%3Cpath d='M3 3l8 7-8 7M15 3l8 7-8 7' fill='none' stroke='%23177AE5' stroke-width='3'/%3E%3C/svg%3E");
+    background-size: 28px 20px;
+  }
+  .grid-lines {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .cursor-blink {
+    animation: blink 1s steps(1) infinite;
+  }
+  .block-blink {
+    animation: blink 1s steps(1) infinite;
+  }
+  /* Slow ambient float for background texture (halftone). Stepped, to stay mechanical. */
+  .drift {
+    animation: drift 9s steps(6) infinite alternate;
+  }
+  /* A one-off scan sweep, used as a decorative divider that periodically "reads". */
+  .scan-sweep {
+    background: linear-gradient(90deg, transparent, rgba(41, 204, 110, 0.5), transparent);
+    background-size: 40% 100%;
+    background-repeat: no-repeat;
+    animation: scan 4.5s steps(20) infinite;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-8px, 5px, 0);
+  }
+}
+
+@keyframes scan {
+  from {
+    background-position: -40% 0;
+  }
+  to {
+    background-position: 140% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  /* The rival reveal is pure motion — never mount its full-screen takeover for these users.
+     Hard backstop in case the JS guard hasn't resolved the media query yet on first paint. */
+  .reveal-overlay {
+    display: none !important;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+}
+
+.qr svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
