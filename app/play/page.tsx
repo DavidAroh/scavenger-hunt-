@@ -1,5 +1,6 @@
 import { Shell } from "@/components/Shell";
 import { StageRouter } from "@/components/play/StageRouter";
+import { QrScanner } from "@/components/play/QrScanner";
 import { PRIZE } from "@/lib/config";
 import { getGameState } from "@/lib/hunt";
 import { getParticipant } from "@/lib/session";
@@ -25,6 +26,7 @@ export default async function PlayPage() {
         <p className="label text-sky">Begin at the booth</p>
         <h1 className="display mt-3">Scan the start QR to enter.</h1>
         <p className="mt-4 text-fog-200">Registration opens from QR 09 at the RIL booth. Scan the fixed starting code there, then your checkpoint progress stays with you.</p>
+        <QrScanner />
       </Shell>
     );
   }

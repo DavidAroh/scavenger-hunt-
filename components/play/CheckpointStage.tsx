@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProgressBlocks } from "../ProgressBlocks";
+import { QrScanner } from "./QrScanner";
 
 type RouteClue = { qrNumber: number; clue: string; hint: string };
 
@@ -35,6 +36,8 @@ export function CheckpointStage({
         <p className="font-semibold text-paper">Route {String(index + 1).padStart(2, "0")} of {total}</p>
         <p className="mt-2">Stay inside the marked hunt area. If you need help, ask an RIL host.</p>
       </div>
+
+      <QrScanner />
 
       <ProgressBlocks done={index} total={total} />
 
