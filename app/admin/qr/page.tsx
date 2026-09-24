@@ -62,7 +62,7 @@ export default async function QrSheet() {
         <BrandLogo tone="black" className="h-12 w-auto" />
         <div className="text-right print:hidden">
           <p className="max-w-lg text-sm mb-2">
-            Codes point to <span className="font-mono">{base}</span>. Confirm <span className="font-mono">NEXT_PUBLIC_BASE_URL</span> is your live domain before printing.
+            Download a single QR as SVG, or print the full sheet and choose Save as PDF. Codes point to <span className="font-mono">{base}</span>; confirm <span className="font-mono">NEXT_PUBLIC_BASE_URL</span> is your live domain first.
           </p>
           <PrintButton />
         </div>
@@ -70,7 +70,7 @@ export default async function QrSheet() {
 
       <h1 className="mt-6 text-3xl sm:text-4xl font-bold tracking-tight">{EVENT.name}: checkpoint QR codes</h1>
       <p className="mt-2 max-w-3xl text-sm text-fog-500 print:hidden">
-        Print at 100% on white paper. Place each code at its matching fixed spot. Test every code with a phone before the hunt opens.
+        Print at 100% on white paper, or download each QR as a scalable SVG. Place codes at their matching fixed spots and test each one with a phone before the hunt opens.
       </p>
       <p className="mt-2 hidden print:block text-sm text-fog-500">Print at 100%. Keep every code black on white with a clear margin.</p>
 
@@ -85,6 +85,14 @@ export default async function QrSheet() {
               <div className="qr aspect-square w-full max-w-[220px]" dangerouslySetInnerHTML={{ __html: svg }} />
             </div>
             <p className="mt-2 break-all font-mono text-[10px] text-fog-500">{url}</p>
+            <a
+              href={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`}
+              download={`RIL-QR-${String(checkpoint.qrNumber).padStart(2, "0")}-${checkpoint.id}.svg`}
+              className="btn btn-blue mt-3 inline-flex print:hidden"
+              aria-label={`Download QR ${String(checkpoint.qrNumber).padStart(2, "0")} ${checkpoint.label} as SVG`}
+            >
+              Download SVG
+            </a>
           </li>
         ))}
       </ol>
