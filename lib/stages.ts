@@ -106,7 +106,7 @@ export const STAGES: Stage[] = [
     kind: "narrative",
     eyebrow: "Checkpoint 00 · The brief",
     title: "The Director's lost treasure.",
-    body: "The Director's treasured collection has disappeared. The trail is contained inside the RIL booth. Follow the clues, explore the displays, and recover the treasure before your rival does.",
+    body: "The Director's treasured collection has disappeared. Follow the trail from the RIL booth through the approved nearby event spots. Scan each fixed checkpoint QR in order and recover the treasure before your rival does.",
     cta: "Begin the hunt",
   },
   {

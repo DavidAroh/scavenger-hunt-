@@ -17,6 +17,7 @@ export function Gate({
   marketingText,
   consentRequired,
   programsText,
+  startToken,
 }: {
   interests: string[];
   roles: string[];
@@ -25,6 +26,7 @@ export function Gate({
   marketingText: string;
   consentRequired: boolean;
   programsText: string;
+  startToken: string;
 }) {
   const [state, action, pending] = useActionState(registerAction, initial);
   const v = state.values;
@@ -42,6 +44,7 @@ export function Gate({
   return (
     <motion.form action={action} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={ENTER} className="space-y-7">
       <input type="hidden" name="mode" value={mode} />
+      <input type="hidden" name="startToken" value={startToken} />
       <input type="hidden" name="role" value={role} />
       <input type="hidden" name="ageRange" value={age} />
       {/* honeypot */}

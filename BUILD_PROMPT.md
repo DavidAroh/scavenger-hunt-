@@ -1,13 +1,13 @@
 # Build prompt: RIL Scavenger Hunt (paste into any AI builder)
 
-Build a mobile-first Next.js web app for a QR-code scavenger hunt run by Renaissance Innovation Labs (RIL), Port Harcourt. Purpose: draw a crowd and capture leads. Participants scan QR codes placed around an event centre; the first scan forces registration (email OR phone) before revealing clue 01; each subsequent scan reveals the next clue; finishing at the RIL booth yields a claim code for a prize (comics + RIL merch).
+Build a mobile-first Next.js web app for a physical and digital QR-code scavenger hunt run by Renaissance Innovation Labs (RIL), Port Harcourt. Purpose: draw a crowd and capture leads. Participants start at a fixed QR at the RIL booth, register (email OR phone), then follow a single ordered route through 12 fixed checkpoints in the RIL booth and approved nearby event spots. Each scan unlocks the next phone stage; finishing at the booth yields a claim code for a prize (comics + RIL merch).
 
 ## Flow
-1. Any QR opens `/h/[token]`. Tokens are random 12-char strings (unguessable, not sequential).
-2. No session cookie -> registration gate (any QR is an entry point). Fields: name, email|phone toggle, optional interest chips (Front-end, Back-end, Mobile, UI/UX, Digital Marketing, Here for the comics), marketing-consent checkbox, hidden honeypot. Same email/phone = resume, never duplicate.
-3. Registered -> server validates the scan against the participant's track and returns one of: clue (valid), already (repeat), wrong (out of order / not started), finished (claim code + rank).
-4. Tracks A/B/C are different orderings of the same locations; all start at `start`, all end at `booth`. New participants get the least-populated track.
-5. Clues are per location (the riddle that leads to it). Order is enforced server-side; the client never gets an unearned clue.
+1. Each fixed checkpoint has a unique random QR token and opens `/checkpoint/[token]`.
+2. Only the booth start QR (QR 09) opens registration. Fields: name, email|phone toggle, optional interest chips, marketing consent, hidden honeypot. Same email/phone = resume, never duplicate.
+3. The fixed route is QR 09 (start), then QR 01–08, QR 10–11, and QR 12 (finish). Server validates each scan against the participant's current stage; repeats are idempotent and out-of-order scans do not reveal content.
+4. A valid scan unlocks the stage for that checkpoint. Players solve the digital challenge, then get the next fixed location name on their phone. Final scan and puzzle complete at the RIL booth.
+5. The map shows actual checkpoint names and progress. Do not expose QR tokens or answers in client bundles.
 6. Prize: first N (20) finishers win, the rest enter a raffle. Claim code `RIL-XXXX` (alphabet without 0/O/1/I/L). Staff verify the code + person at `/admin`.
 7. Extras: `/recover` (resume by email/phone), `/leaderboard` (big screen, auto-refresh 8s, first name + last initial only), `/admin` (stats, claim desk, per-checkpoint scans, leads table, CSV export with formula-injection guard), `/admin/qr` (printable QR sheet), password-protected admin via signed httpOnly cookie.
 
@@ -43,7 +43,7 @@ Stepped easing function `t => Math.floor(t*n)/n` for the mechanical feel. Typewr
 Design at 360px, scale to 430px; single column <= 480px centred from 640px. Leaderboard/admin use a wider container from 1024px. Tap targets >= 48px. Assume flaky venue connectivity: keep JS light, no blocking spinners.
 
 ## Data model
-`participants(id, name, email unique, phone unique, interest[], consent, track, session_token unique, entry_location, source, created_at)` · `scans(participant_id, location_id, scanned_at; PK both)` · `completions(participant_id PK, finished_at, duration_ms, claim_code unique, claimed_at)`. RLS on, no public policies; all access server-side with the service-role key. Locations, clues, tracks and prize rules live in one config file.
+`participants(id, name, email unique, phone unique, interest[], consent, track, session_token unique, entry_location, checkpoint_progress, created_at)` · `stage_events(participant_id, stage_id, attempts, solved_at)` · `completions(participant_id PK, finished_at, duration_ms, claim_code unique, claimed_at)`. RLS on, no public policies; all access server-side with the service-role key. Checkpoint order and labels are configured without exposing tokens to player bundles.
 
 ## Tech stack
 Next.js 15 App Router, React 19, TypeScript, Tailwind CSS 3 (tokens above in `tailwind.config.ts`), Framer Motion 12, Supabase JS v2 (with an in-memory fallback store for demo mode), `qrcode`, `@fontsource-variable/open-sans`, `@fontsource/jetbrains-mono`. Server actions for register/recover/admin; cookie sessions (httpOnly, sameSite=lax).

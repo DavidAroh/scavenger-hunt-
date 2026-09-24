@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Completion, NewParticipant, Participant, RaffleEntry, Store } from "../types";
+import type { Checkpoint, Completion, NewParticipant, Participant, RaffleEntry, Store } from "../types";
 
 let client: SupabaseClient | null = null;
 const sb = () =>
@@ -21,6 +21,7 @@ const toParticipant = (r: any): Participant => ({
   entryLocation: r.entry_location,
   createdAt: r.created_at,
   stage: r.stage ?? 0,
+  checkpointProgress: r.checkpoint_progress ?? 0,
   collected: r.collected ?? {},
   startedAt: r.started_at ?? null,
   handle: r.handle ?? null,
@@ -41,6 +42,13 @@ const toRaffleEntry = (r: any): RaffleEntry => ({
   reason: r.reason,
   createdAt: r.created_at,
 });
+const toCheckpoint = (r: any): Checkpoint => ({
+  id: r.id,
+  token: r.token,
+  qrNumber: r.qr_number,
+  position: r.position,
+  label: r.label,
+});
 const must = <T>(res: { data: T | null; error: { message: string } | null }): T => {
   if (res.error) throw new Error(res.error.message);
   return res.data as T;
@@ -58,6 +66,7 @@ export const supabaseStore: Store = {
         consent: p.consent,
         marketing_consent: p.marketingConsent ?? false,
         track: p.track,
+        checkpoint_progress: 0,
         session_token: p.sessionToken,
         entry_location: p.entryLocation,
         handle: p.handle ?? null,
@@ -88,6 +97,18 @@ export const supabaseStore: Store = {
   async findById(id) {
     const row = must(await sb().from("participants").select().eq("id", id).maybeSingle());
     return row ? toParticipant(row) : null;
+  },
+  async listCheckpoints() {
+    const rows = must(await sb().from("hunt_checkpoints").select().order("position")) as any[];
+    return (rows ?? []).map(toCheckpoint);
+  },
+  async getCheckpointByToken(token) {
+    const row = must(await sb().from("hunt_checkpoints").select().eq("token", token).maybeSingle());
+    return row ? toCheckpoint(row) : null;
+  },
+  async getCheckpointByPosition(position) {
+    const row = must(await sb().from("hunt_checkpoints").select().eq("position", position).maybeSingle());
+    return row ? toCheckpoint(row) : null;
   },
   async createCompletion(c) {
     const { error } = await sb()
@@ -155,6 +176,14 @@ export const supabaseStore: Store = {
       await sb().from("participants").update(patch).eq("id", participantId).select().single(),
     );
     return toParticipant(row);
+  },
+  async advanceCheckpoint(participantId, checkpointPosition) {
+    const { error } = await sb().rpc("advance_hunt_checkpoint", {
+      p_participant_id: participantId,
+      p_checkpoint_position: checkpointPosition,
+    });
+    if (error) throw new Error(error.message);
+    return this.findById(participantId);
   },
   async recordAttempt(participantId, stageId, solved) {
     // Read-modify-write: bump attempts, stamp solved_at on first solve.

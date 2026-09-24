@@ -13,6 +13,8 @@ export type Participant = {
   // ---- treasure-hunt progress (added for the Director's Lost Treasure game) ----
   /** Index into STAGES of the stage the player is currently on. 0 = not started. */
   stage: number;
+  /** Highest checkpoint position scanned in order (0 is the booth start QR). */
+  checkpointProgress: number;
   /** Items the player has collected, keyed by ItemKey (e.g. riddle01 answer, booth symbol). */
   collected: Record<string, string>;
   /** Set when the player taps BEGIN THE HUNT; the duration clock starts here. */
@@ -39,13 +41,21 @@ export type RaffleEntry = {
   createdAt: string;
 };
 
+export type Checkpoint = {
+  id: string;
+  token: string;
+  qrNumber: number;
+  position: number;
+  label: string;
+};
+
 /**
  * What a caller supplies to create a participant. Progress fields (stage/collected/startedAt)
  * are store-managed and default on insert. The optional lead fields default to null/false.
  */
 export type NewParticipant = Omit<
   Participant,
-  "id" | "createdAt" | "stage" | "collected" | "startedAt" | "handle" | "ageRange" | "role" | "wantsPrograms" | "marketingConsent"
+  "id" | "createdAt" | "stage" | "checkpointProgress" | "collected" | "startedAt" | "handle" | "ageRange" | "role" | "wantsPrograms" | "marketingConsent"
 > &
   Partial<Pick<Participant, "handle" | "ageRange" | "role" | "wantsPrograms" | "marketingConsent">>;
 
@@ -55,6 +65,9 @@ export interface Store {
   findBySession(token: string): Promise<Participant | null>;
   findByContact(c: { email?: string | null; phone?: string | null }): Promise<Participant | null>;
   findById(id: string): Promise<Participant | null>;
+  listCheckpoints(): Promise<Checkpoint[]>;
+  getCheckpointByToken(token: string): Promise<Checkpoint | null>;
+  getCheckpointByPosition(position: number): Promise<Checkpoint | null>;
   createCompletion(c: Omit<Completion, "claimedAt">): Promise<Completion>;
   getCompletion(participantId: string): Promise<Completion | null>;
   getCompletionByCode(code: string): Promise<Completion | null>;
@@ -70,6 +83,8 @@ export interface Store {
     collected: Record<string, string>,
     startedAt?: string,
   ): Promise<Participant | null>;
+  /** Atomically accepts only the next physical checkpoint for the participant's current stage. */
+  advanceCheckpoint(participantId: string, checkpointPosition: number): Promise<Participant | null>;
   /** Idempotent per (participant, stage): bumps the attempt count, stamps solvedAt on first solve. */
   recordAttempt(participantId: string, stageId: string, solved: boolean): Promise<void>;
   /**

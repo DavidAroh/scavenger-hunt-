@@ -13,9 +13,9 @@ export const dynamic = "force-dynamic";
 
 const STEPS = [
   ["01", "Enter the hunt", "Name plus email or phone. The story begins."],
-  ["02", "Solve the clues", "Riddles, hidden messages, and one clue hidden on the RIL booth."],
-  ["03", "Beat your rival", "Someone else is hunting too. Move fast, watch for the twist."],
-  ["04", "Recover the treasure", `Finish and claim ${PRIZE.description} at the booth.`],
+  ["02", "Find the checkpoints", "Follow the route through the RIL booth and approved nearby event spots."],
+  ["03", "Scan and solve", "Each fixed QR unlocks the next phone clue. Checkpoints must be found in order."],
+  ["04", "Recover the treasure", `Finish at the RIL booth and claim ${PRIZE.description}.`],
 ];
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ resumed?: string }> }) {
@@ -40,7 +40,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </h1>
         </Item>
         <Item as="p" className="mt-6 text-lg text-fog-200 font-light relative">
-          The whole trail is inside the RIL booth. Scan, solve, play and claim your treasure without leaving the booth zone.
+          Start at the RIL booth, follow the clues through approved nearby event spots, then return to the booth for the treasure.
         </Item>
       </Stagger>
 

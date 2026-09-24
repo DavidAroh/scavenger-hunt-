@@ -41,6 +41,10 @@ export async function registerAction(_prev: GateState, fd: FormData): Promise<Ga
 
   // Honeypot: real people never see or fill this field. Bots get a silent bounce.
   if (String(fd.get("website") ?? "")) redirect("/play");
+  const startCheckpoint = await store.getCheckpointByToken(String(fd.get("startToken") ?? ""));
+  if (!startCheckpoint || startCheckpoint.position !== 0) {
+    return { error: "Start by scanning the RIL booth QR code." };
+  }
 
   const name = cleanName(values.name);
   if (!name) return { error: "We need a name (2 to 60 characters).", values };

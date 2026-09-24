@@ -1,4 +1,5 @@
 import { randomInt } from "node:crypto";
+import { clueForCheckpointPosition } from "./checkpoints";
 import { PRIZE } from "./config";
 import { ITEM_LABELS, STAGES, TOTAL_STAGES, type ItemKey, type Stage, stageById } from "./stages";
 import { store } from "./store";
@@ -50,7 +51,8 @@ export type StageView =
   | { kind: "codelock"; id: string; index: number; eyebrow: string; title: string; prompt: string; items: { label: string; value: string }[]; inputMode?: "numeric" | "text" };
 
 export type GameState =
-  | { phase: "playing"; index: number; total: number; stage: StageView }
+  | { phase: "playing"; index: number; total: number; stage: StageView; nextCheckpoint: ReturnType<typeof clueForCheckpointPosition> }
+  | { phase: "checkpoint"; index: number; total: number; checkpoint: NonNullable<ReturnType<typeof clueForCheckpointPosition>> }
   | { phase: "finished"; result: FinishedResult };
 
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // no 0/O/1/I/L
@@ -149,6 +151,17 @@ export async function getGameState(p: Participant): Promise<GameState> {
   if (existing) return { phase: "finished", result: await finishedResult(p, existing) };
 
   const index = Math.min(p.stage, TOTAL_STAGES - 1);
+  if (p.checkpointProgress < index) {
+    const checkpoint = clueForCheckpointPosition(index);
+    if (checkpoint) {
+      return {
+        phase: "checkpoint",
+        index,
+        total: TOTAL_STAGES,
+        checkpoint,
+      };
+    }
+  }
   const stage = STAGES[index];
 
   // Timed stages own a server-side countdown. Reaching one starts the clock; a clock that has
@@ -162,10 +175,22 @@ export async function getGameState(p: Participant): Promise<GameState> {
       deadline = new Date(t.startedAt).getTime() + stage.seconds * 1000;
     }
     const remainingMs = Math.max(0, deadline - Date.now());
-    return { phase: "playing", index, total: TOTAL_STAGES, stage: toView(stage, index, p, { remainingMs, timeouts: t.timeouts }) };
+    return {
+      phase: "playing",
+      index,
+      total: TOTAL_STAGES,
+      stage: toView(stage, index, p, { remainingMs, timeouts: t.timeouts }),
+      nextCheckpoint: index === 0 ? null : clueForCheckpointPosition(index + 1),
+    };
   }
 
-  return { phase: "playing", index, total: TOTAL_STAGES, stage: toView(stage, index, p) };
+  return {
+    phase: "playing",
+    index,
+    total: TOTAL_STAGES,
+    stage: toView(stage, index, p),
+    nextCheckpoint: index === 0 ? null : clueForCheckpointPosition(index + 1),
+  };
 }
 
 /** Persists a stage advance: bumps to `nextIndex`, merges a granted item, finalizes past the end. */

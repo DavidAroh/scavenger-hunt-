@@ -1,17 +1,4 @@
-const WAYPOINTS = [
-  "Trailhead",
-  "Keykeeper's Hall",
-  "Rival's Crossing",
-  "Whispering Wall",
-  "Torn Map Cove",
-  "Booth Outpost",
-  "Joinery Bridge",
-  "Raceway",
-  "Signal Lookout",
-  "Mapmaker's Ridge",
-  "The Old Lock",
-  "Treasure Vault",
-];
+import { CHECKPOINT_LABELS } from "@/lib/checkpoint-labels";
 
 const POINTS = [
   [30, 50], [88, 50], [146, 50], [204, 50], [262, 50], [320, 50],
@@ -23,8 +10,8 @@ export function ProgressBlocks({ done, total }: { done: number; total: number })
   const cleared = Math.min(Math.max(done, 0), total);
   const current = Math.min(cleared, Math.max(total - 1, 0));
   const allFound = total > 0 && cleared === total;
-  const currentName = allFound ? "Treasure recovered" : WAYPOINTS[current] ?? `Waypoint ${current + 1}`;
-  const places = Array.from({ length: total }, (_, i) => WAYPOINTS[i] ?? `Waypoint ${i + 1}`);
+  const currentName = allFound ? "Treasure recovered" : CHECKPOINT_LABELS[current] ?? `Waypoint ${current + 1}`;
+  const places = Array.from({ length: total }, (_, i) => CHECKPOINT_LABELS[i] ?? `Waypoint ${i + 1}`);
 
   return (
     <section className="treasure-map" aria-label="Treasure hunt progress">
@@ -42,7 +29,7 @@ export function ProgressBlocks({ done, total }: { done: number; total: number })
 
       <div className="treasure-map__land mt-4" role="img" aria-label={`${cleared} of ${total} map locations found. ${allFound ? "Treasure recovered." : `Current location: ${currentName}.`}`}>
         <svg viewBox="0 0 350 182" className="treasure-map__svg" aria-hidden="true" focusable="false">
-          {/* A hand-drawn island, with a winding trail through the booth's story. */}
+          {/* A hand-drawn trail linking the real event checkpoints. */}
           <path d="M10 38Q18 18 48 23L96 18Q120 12 149 22L199 15Q226 13 246 23L303 19Q336 23 340 48L335 82Q345 106 333 140Q327 164 297 163L249 169Q224 176 195 165L147 171Q119 176 99 164L48 169Q17 164 13 140L17 111Q7 88 14 65Z" fill="#e8d7ad" stroke="#b99c68" strokeWidth="2" />
           <path d="M24 41Q51 31 77 37M124 32Q144 26 166 35M239 35Q268 28 293 37M29 149Q55 157 79 148M221 151Q246 161 273 151" fill="none" stroke="#c7b17e" strokeWidth="2" strokeLinecap="round" />
           <path d="M24 52L88 52L146 52L204 52L262 52L320 52L320 132L262 132L204 132L146 132L88 132L30 132" fill="none" stroke="#8d7852" strokeWidth="4" strokeDasharray="3 7" strokeLinecap="round" strokeLinejoin="round" />
@@ -94,7 +81,7 @@ export function ProgressBlocks({ done, total }: { done: number; total: number })
       <ol className="sr-only" aria-label="Treasure trail checkpoints">
         {places.map((name, i) => (
           <li key={`${name}-status-${i}`} aria-current={!allFound && i === current ? "step" : undefined}>
-            {name}: {i < cleared ? "found" : !allFound && i === current ? "you are here" : "up ahead"}
+            {i < cleared ? `${name}: found` : `Route stop ${String(i + 1).padStart(2, "0")}: ${!allFound && i === current ? "you are here" : "up ahead"}`}
           </li>
         ))}
       </ol>

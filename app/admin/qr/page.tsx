@@ -4,54 +4,96 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { PrintButton } from "@/components/PrintButton";
 import { requireAdmin } from "@/lib/admin-auth";
 import { EVENT } from "@/lib/config";
-import { isPersistentStorageConfigured } from "@/lib/store";
+import { isPersistentStorageConfigured, store } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-/** Print-ready sheet for the ONE booth QR. White paper, brand-black ink. */
 export default async function QrSheet() {
   await requireAdmin();
-  if (!isPersistentStorageConfigured) return <div className="min-h-dvh bg-paper text-ink p-8"><h1 className="text-3xl font-bold">Do not print yet</h1><p className="mt-3">Configure persistent Supabase storage before printing the live hunt QR.</p></div>;
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const base = (process.env.NEXT_PUBLIC_BASE_URL || `${proto}://${host}`).replace(/\/$/, "");
+  if (!isPersistentStorageConfigured) {
+    return (
+      <div className="min-h-dvh bg-paper text-ink p-8">
+        <h1 className="text-3xl font-bold">Do not print yet</h1>
+        <p className="mt-3">Configure persistent Supabase storage before printing live checkpoint codes.</p>
+      </div>
+    );
+  }
 
-  const url = `${base}/`;
-  const svg = await QRCode.toString(url, {
-    type: "svg",
-    margin: 1,
-    errorCorrectionLevel: "M",
-    color: { dark: "#212120", light: "#FFFFFF" },
-  });
+  let checkpoints;
+  try {
+    checkpoints = await store.listCheckpoints();
+  } catch {
+    return (
+      <div className="min-h-dvh bg-paper text-ink p-8">
+        <h1 className="text-3xl font-bold">Checkpoint setup needed</h1>
+        <p className="mt-3">Run <code>supabase/migrations/20260924_checkpoint_progress.sql</code> in the Supabase SQL Editor, then reload this page.</p>
+      </div>
+    );
+  }
+  if (checkpoints.length !== 12) {
+    return (
+      <div className="min-h-dvh bg-paper text-ink p-8">
+        <h1 className="text-3xl font-bold">Checkpoint setup incomplete</h1>
+        <p className="mt-3">The database returned {checkpoints.length} of 12 checkpoint codes. Run the migration and reload this page.</p>
+      </div>
+    );
+  }
+
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
+  const proto = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const base = (process.env.NEXT_PUBLIC_BASE_URL || `${proto}://${host}`).replace(/\/$/, "");
+  const entries = await Promise.all(
+    checkpoints.map(async (checkpoint) => {
+      const url = `${base}/checkpoint/${checkpoint.token}`;
+      const svg = await QRCode.toString(url, {
+        type: "svg",
+        margin: 2,
+        errorCorrectionLevel: "M",
+        color: { dark: "#212120", light: "#FFFFFF" },
+      });
+      return { checkpoint, url, svg };
+    }),
+  );
 
   return (
-    <div className="min-h-dvh bg-paper text-ink px-8 py-8">
-      <div className="flex items-start justify-between print:mb-4">
+    <main className="min-h-dvh bg-paper text-ink px-6 py-8 sm:px-8">
+      <header className="flex items-start justify-between gap-4 print:mb-4">
         <BrandLogo tone="black" className="h-12 w-auto" />
         <div className="text-right print:hidden">
-          <p className="text-sm mb-2">
-            Encoding <span className="font-mono">{url}</span>. Set NEXT_PUBLIC_BASE_URL to your live domain first.
+          <p className="max-w-lg text-sm mb-2">
+            Codes point to <span className="font-mono">{base}</span>. Confirm <span className="font-mono">NEXT_PUBLIC_BASE_URL</span> is your live domain before printing.
           </p>
           <PrintButton />
         </div>
-      </div>
-      <h1 className="mt-6 text-4xl font-bold tracking-tight">{EVENT.name}: booth QR</h1>
-      <p className="text-sm mt-1 text-fog-500">Print at 100%. Keep at least 3cm of white around the code. Do not rotate or re-colour the logo.</p>
+      </header>
 
-      <div className="mt-8 max-w-md">
-        <section className="break-inside-avoid">
-          <div className="flex items-baseline justify-between mb-2">
-            <h2 className="text-xl font-bold">Scan to start the hunt</h2>
-            <span className="label text-fog-500">BOOTH</span>
-          </div>
-          <div className="border-[3px] border-ink p-3 bg-white">
-            <div className="qr w-full aspect-square" dangerouslySetInnerHTML={{ __html: svg }} />
-          </div>
-          <p className="mt-2 text-xs font-mono break-all text-fog-500">{url}</p>
-          <p className="text-xs mt-1">Place: front and centre on the RIL booth. This is the only code players scan.</p>
-        </section>
-      </div>
-    </div>
+      <h1 className="mt-6 text-3xl sm:text-4xl font-bold tracking-tight">{EVENT.name}: checkpoint QR codes</h1>
+      <p className="mt-2 max-w-3xl text-sm text-fog-500 print:hidden">
+        Print at 100% on white paper. Place each code at its matching fixed spot. Test every code with a phone before the hunt opens.
+      </p>
+      <p className="mt-2 hidden print:block text-sm text-fog-500">Print at 100%. Keep every code black on white with a clear margin.</p>
+
+      <ol className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 print:grid-cols-2 print:gap-3">
+        {entries.map(({ checkpoint, url, svg }, i) => (
+          <li key={checkpoint.id} className="break-inside-avoid border-[3px] border-ink p-4 print:p-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-lg font-bold leading-tight">QR {String(checkpoint.qrNumber).padStart(2, "0")} · {checkpoint.label}</h2>
+              <span className="shrink-0 font-mono text-xs text-fog-500">STOP {String(i + 1).padStart(2, "0")}</span>
+            </div>
+            <div className="mt-3 flex justify-center border-2 border-ink bg-white p-2">
+              <div className="qr aspect-square w-full max-w-[220px]" dangerouslySetInnerHTML={{ __html: svg }} />
+            </div>
+            <p className="mt-2 break-all font-mono text-[10px] text-fog-500">{url}</p>
+          </li>
+        ))}
+      </ol>
+
+      <aside className="mt-8 border-2 border-ink p-4 text-sm print:hidden">
+        <p className="font-bold">Route order</p>
+        <p className="mt-1">QR 09 start → QR 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 10 → 11 → QR 12 finish.</p>
+        <p className="mt-2 text-fog-500">Apply <span className="font-mono">supabase/migrations/20260924_checkpoint_progress.sql</span> before testing checkpoint scans.</p>
+      </aside>
+    </main>
   );
 }

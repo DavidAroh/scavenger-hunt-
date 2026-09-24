@@ -1,6 +1,6 @@
 # The Director's Lost Treasure
 
-A single-QR, answer-driven narrative treasure hunt for Renaissance Innovation Labs (RIL), built for the Nerd Work event. One QR at the RIL booth launches everything: players **register to begin**, then chase a linear story — riddles, a hidden message, one clue hidden on the physical booth, a timed race against a rival, a red-herring map twist — and finish with a claim code for comics + merch. Every registration is a lead.
+A 12-QR physical and digital treasure hunt for Renaissance Innovation Labs (RIL), built for the Nerd Work event. Players start at the booth, register once, then follow fixed checkpoint QRs through the approved route. Each scan unlocks the next phone stage; the final QR returns them to the booth to claim comics + merch. Every registration is a lead.
 
 Dev-brutalist UI on the RIL brand system (Open Sans, `#212120` / `#FFFFFF` / `#177AE5`, hard borders, hard shadows, stepped motion, `[ ]` bracket motif).
 
@@ -37,11 +37,12 @@ Try it: open `/`, register, then play the hunt. The event-ready answer key is in
 
 ## How the game works
 
-- **One QR**, printed at the booth, points at `/`. No session? Registration comes first, so every play captures a lead. Same email/phone again resumes the same person (no duplicate leads).
+- **Twelve fixed QR codes** identify the real checkpoints. QR 09 at the booth starts registration; players then scan QR 01–08, QR 10–11, and QR 12 at the booth to finish. Each scan is checked against the current route stage on the server.
+- Registration starts only from QR 09. Same email/phone resumes the existing participant instead of creating a duplicate lead.
 - Registration = name + email **or** phone + hunt participation consent. Optional marketing consent is stored separately. Handle, interests, role, age range and program interest are optional and collapsed behind a *Tell us more* toggle.
 - The whole trail is **one linear script** in [`lib/stages.ts`](lib/stages.ts). Everyone plays the same order on their own phone.
 - Progress is enforced **on the server** ([`lib/hunt.ts`](lib/hunt.ts)): the client only ever receives the stage it has earned, and never the answers. Reloading is idempotent — close the tab and you resume on the exact stage with your collected items intact.
-- **Exactly one physical touchpoint:** the `symbol` stage asks the player to find the blue numeral `7` on the RIL booth and type it.
+- The route combines venue movement with phone puzzles. Keep all checkpoint signs fixed, approved, visible, and reachable; the QR page confirms each checkpoint before revealing its stage.
 - **The twist** (`codelock`): the naive map code is politely rejected with a nudge ("one piece was misread"); only the corrected code advances. Enforced server-side.
 - **The race** (`timed`): a server-authoritative countdown. The on-screen timer is cosmetic — the server owns the clock, so reloading can't buy time; running out scrambles the prompt and restarts the window.
 - **The reveal**: a rival "signal detected" animation ([`components/play/RevealSequence.tsx`](components/play/RevealSequence.tsx)), disabled under `prefers-reduced-motion`.
@@ -64,17 +65,17 @@ Try it: open `/`, register, then play the hunt. The event-ready answer key is in
 | `/leaderboard` | Big-screen live board (auto-refresh, handles + time + rank) |
 | `/experience` | Community showcase, bootcamp overview, ticket/merch offers and booth activities |
 | `/admin` | Stats, prize claim desk, raffle-entry desk, stage funnel and lead table |
-| `/admin/qr` | Print-ready QR sheet (encodes `/`) |
+| `/admin/qr` | Print-ready sheet for all 12 fixed checkpoint QR codes |
 | `/admin/export` | Leads CSV (formula-injection safe) |
 | `/admin/raffle-export` | Weighted raffle-ticket CSV for a staff-run random draw |
 
 ## Go live
 
 1. **Configure the event.** Review `lib/config.ts`; add approved project details, event dates, bootcamp curriculum, ticket/merch URLs and exact prize inventory. Place the blue `7` on the booth. See [`EVENT_RUNBOOK.md`](EVENT_RUNBOOK.md).
-2. **Supabase** (required for real events): create a project and run [`supabase/schema.sql`](supabase/schema.sql). RLS is on with no public policies; the app only talks to it server-side with the service-role key.
+2. **Supabase** (required for real events): create a project and run [`supabase/schema.sql`](supabase/schema.sql). For an existing project, also run [`supabase/migrations/20260924_checkpoint_progress.sql`](supabase/migrations/20260924_checkpoint_progress.sql). RLS is on with no public policies; the app only talks to it server-side with the service-role key.
 3. **Env** (`.env.local` / Vercel): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `SESSION_SECRET` (long random), `NEXT_PUBLIC_BASE_URL` (your live domain, no trailing slash).
-4. **Deploy** (Vercel works out of the box), open `/admin/qr`, **print the sheet**, place the one QR at the booth.
-5. **Dry run** on a couple of phones before doors open — including the physical booth-symbol step.
+4. **Deploy** (Vercel works out of the box), open `/admin/qr`, **print the 12-code sheet**, and place each QR at its matching checkpoint.
+5. **Dry run** the full route on a couple of phones before doors open. Scan QR 09, then 01–08, 10–11, and 12; also try an out-of-order scan.
 
 ## Design system (from the RIL press kit)
 
@@ -92,4 +93,4 @@ Try it: open `/`, register, then play the hunt. The event-ready answer key is in
 - **Resume trust model.** `/recover` accepts anyone who knows a participant's email/phone. That's fine for a game, which is why prize claims require staff to check the person's name/ID. Don't skip that step.
 - **The answer endpoint is a new abuse surface.** There's a honeypot field, nothing more. Add rate limiting (Vercel WAF / Upstash) on the register + submit actions if you expect bots.
 - **Demo store is not for production.** It's per-process memory; on serverless it will lose data.
-- The QR sheet encodes `NEXT_PUBLIC_BASE_URL` (falls back to the request host). Print only after that's your live domain. Keep the QR plain — no logo in the centre, no recolouring (kit logo rules + scan reliability).
+- The QR sheet encodes `NEXT_PUBLIC_BASE_URL` (falls back to the request host). Print only after that's your live domain. Keep the QRs plain — no logo in the centre, no recolouring (kit logo rules + scan reliability).

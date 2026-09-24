@@ -1,11 +1,14 @@
 # RIL at Nerd Work — Event Runbook
 
-This runbook connects the hunt app to the physical booth. **The complete attendee journey stays inside the RIL booth footprint**: QR registration, phone puzzles, physical clue, head-to-head game, demos, showcase, offers and prize claims. Do not place clues elsewhere in the venue. Update the event-specific values in `lib/config.ts` before printing materials or opening registration.
+This runbook connects the hunt app to fixed QR checkpoints at the RIL booth and nearby event spots approved for placement. Players start and finish at the booth, follow one ordered route, and solve phone puzzles between physical scans. Do not move checkpoint signs after printing the route. Update event-specific values in `lib/config.ts` before opening registration.
 
 ## Before doors open
 
 - Deploy with Supabase configured; the in-memory demo store is not suitable for live leads or prize claims.
-- Set `NEXT_PUBLIC_BASE_URL` to the final HTTPS domain, then sign in to `/admin/qr` and print a scan-tested QR sheet.
+- For an existing Supabase project, apply [`supabase/migrations/20260924_checkpoint_progress.sql`](supabase/migrations/20260924_checkpoint_progress.sql). For a new project, run the full [`supabase/schema.sql`](supabase/schema.sql).
+- Set `NEXT_PUBLIC_BASE_URL` to the final HTTPS domain, then sign in to `/admin/qr` and print the 12-code sheet.
+- Place the codes in route order: QR 09 at the booth start; QR 01 at the entrance; QR 02 in the Daimayo area; QR 03 at AC 3; QR 04 stage left; QR 05 stage right; QR 06 below speaker 1; QR 07 at David's fixed station; QR 08 at the 16th tile row from the entrance; QR 10 at the registration table; QR 11 at Kelvin's fixed station; QR 12 at the booth finish.
+- Make QR 06 reachable without touching or climbing on speaker equipment. Mark the exact direction and tile-count starting edge for QR 08. Keep David's and Kelvin's QR signs fixed even if either host steps away.
 - Put a clearly visible **blue numeral 7** on the booth. The physical clue accepts `7` (and the word `seven`). Keep it on the booth for the full event.
 - Configure the bootcamp, ticket and merch URLs in `lib/config.ts`. Confirm the bootcamp curriculum, eligibility, dates, ticket discount rules, available sizes, stock and prices with the responsible RIL teams.
 - Replace the generic showcase cards with approved project titles, descriptions, maker names and demo instructions. Obtain permission before displaying any participant work or personal details.
@@ -32,7 +35,7 @@ Do not post this section where participants can see it.
 
 1. **Welcome / QR:** one staff member invites attendees to scan, explains the required contact field and participation consent, and points out the optional marketing checkbox.
 2. **RIL Versus:** reserve two laptops, power, a chosen head-to-head game, a visible queue and a staff member to start matches and announce winners. The website does not run or score this game; decide the game and match length before the event.
-3. **Treasure hunt:** keep the numeral 7 in place within the booth footprint, help with hints without giving answers, and direct stuck players to `/recover` if they changed phones or cleared their browser. All other hunt stages are on the participant's phone; no venue-wide search is required.
+3. **Treasure hunt:** keep every QR at its named location, help with non-spoiler hints, and direct stuck players to `/recover` if they changed phones or cleared their browser. Scans are accepted in order only; an out-of-order QR does not unlock its stage.
 4. **Community showcase:** assign a maker or host to each demo. Keep a short introduction and a bootcamp QR/link beside each exhibit.
 5. **Prize desk:** open `/admin`, look up the claim code, verify the winner's name or identity, check the prize inventory, then mark the claim. Do not mark a prize claimed before handing it over.
 6. **Offers and raffle:** point attendees to `/experience`. Explain current ticket discounts, merchandise stock, bootcamp details and raffle eligibility using the approved terms for the event.

@@ -1,18 +1,13 @@
 import { Shell } from "@/components/Shell";
-import { Gate } from "@/components/Gate";
 import { StageRouter } from "@/components/play/StageRouter";
-import { AGE_RANGES, CONSENT_REQUIRED, CONSENT_TEXT, INTERESTS, MARKETING_TEXT, PRIZE, PROGRAMS_TEXT, ROLES } from "@/lib/config";
+import { PRIZE } from "@/lib/config";
 import { getGameState } from "@/lib/hunt";
 import { getParticipant } from "@/lib/session";
 import { isStorageReady } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-/**
- * The hunt itself. One entry point (the booth QR → "/" → here). Flow:
- *  1. no session  -> registration gate (every play-through captures a lead)
- *  2. registered  -> getGameState() returns the earned stage; StageRouter renders it
- */
+/** The booth QR starts registration; the route QR codes unlock later game stages. */
 export default async function PlayPage() {
   if (!isStorageReady) {
     return (
@@ -27,15 +22,9 @@ export default async function PlayPage() {
   if (!me) {
     return (
       <Shell>
-        <Gate
-          interests={INTERESTS}
-          roles={ROLES}
-          ageRanges={AGE_RANGES}
-          consentText={CONSENT_TEXT}
-          marketingText={MARKETING_TEXT}
-          consentRequired={CONSENT_REQUIRED}
-          programsText={PROGRAMS_TEXT}
-        />
+        <p className="label text-sky">Begin at the booth</p>
+        <h1 className="display mt-3">Scan the start QR to enter.</h1>
+        <p className="mt-4 text-fog-200">Registration opens from QR 09 at the RIL booth. Scan the fixed starting code there, then your checkpoint progress stays with you.</p>
       </Shell>
     );
   }

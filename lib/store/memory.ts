@@ -1,5 +1,6 @@
-import { randomUUID } from "node:crypto";
-import type { Completion, NewParticipant, Participant, RaffleEntry, Store } from "../types";
+import { randomBytes, randomUUID } from "node:crypto";
+import type { Checkpoint, Completion, NewParticipant, Participant, RaffleEntry, Store } from "../types";
+import { CHECKPOINTS } from "../checkpoints";
 
 type StageEvent = {
   attempts: number;
@@ -14,6 +15,7 @@ type DB = {
   participants: Map<string, Participant>;
   completions: Map<string, Completion>;
   raffleEntries: RaffleEntry[];
+  checkpoints: Checkpoint[];
   /** Keyed `${participantId}|${stageId}`. */
   events: Map<string, StageEvent>;
 };
@@ -24,8 +26,16 @@ const db: DB = (g.__ril_db ??= {
   participants: new Map(),
   completions: new Map(),
   raffleEntries: [],
+  checkpoints: [],
   events: new Map(),
 });
+
+if (!Array.isArray(db.checkpoints) || db.checkpoints.length === 0) {
+  db.checkpoints = CHECKPOINTS.map((checkpoint) => ({
+    ...checkpoint,
+    token: randomBytes(24).toString("base64url"),
+  }));
+}
 
 export const memoryStore: Store = {
   async createParticipant(p: NewParticipant) {
@@ -34,6 +44,7 @@ export const memoryStore: Store = {
       id: randomUUID(),
       createdAt: new Date().toISOString(),
       stage: 0,
+      checkpointProgress: 0,
       collected: {},
       startedAt: null,
       handle: p.handle ?? null,
@@ -57,6 +68,15 @@ export const memoryStore: Store = {
   },
   async findById(id) {
     return db.participants.get(id) ?? null;
+  },
+  async listCheckpoints() {
+    return [...db.checkpoints].sort((a, b) => a.position - b.position);
+  },
+  async getCheckpointByToken(token) {
+    return db.checkpoints.find((checkpoint) => checkpoint.token === token) ?? null;
+  },
+  async getCheckpointByPosition(position) {
+    return db.checkpoints.find((checkpoint) => checkpoint.position === position) ?? null;
   },
   async createCompletion(c) {
     const existing = db.completions.get(c.participantId);
@@ -99,6 +119,16 @@ export const memoryStore: Store = {
     p.stage = stage;
     p.collected = collected;
     if (startedAt && !p.startedAt) p.startedAt = startedAt;
+    return p;
+  },
+  async advanceCheckpoint(participantId, checkpointPosition) {
+    const p = db.participants.get(participantId);
+    if (!p) return null;
+    if (checkpointPosition <= p.checkpointProgress) return p;
+    if (checkpointPosition !== p.checkpointProgress + 1 || checkpointPosition !== p.stage) {
+      throw new Error("That is not the next checkpoint on your route.");
+    }
+    p.checkpointProgress = checkpointPosition;
     return p;
   },
   async recordAttempt(participantId, stageId, solved) {
