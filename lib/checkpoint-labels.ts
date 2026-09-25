@@ -21,16 +21,16 @@ export const CHECKPOINT_QR_NUMBERS = [9, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12] as 
 export const CHECKPOINT_CLUES = [
   null,
   {
-    clue: "Every journey starts where guests cross from outside into the event. Find the entrance.",
-    hint: "Look for the event's main way in.",
+    clue: "Your first step lies where the crowd passes from outside into the event.",
+    hint: "Look for the main doorway people use to enter.",
   },
   {
-    clue: "A name on this floor echoes a mighty Japanese lord. Find the area named Daimayo.",
-    hint: "Look for the Daimayo sign or marked area.",
+    clue: "A daimyo ruled in old Japan. Which marked area carries a name close to that title?",
+    hint: "A daimyo was a powerful lord in feudal Japan.",
   },
   {
-    clue: "The room is lively, but even treasure hunters need a breeze. Find the cooling unit marked AC 3.",
-    hint: "Look for the AC 3 label.",
+    clue: "Treasure hunters need a cool head. Look for the numbered breeze-maker.",
+    hint: "Its label names the third air-conditioning unit.",
   },
   {
     clue: "Face the stage as a performer would. Take the performer's left; your next mark waits there.",
@@ -49,8 +49,8 @@ export const CHECKPOINT_CLUES = [
     hint: "Ask an RIL host for help finding David.",
   },
   {
-    clue: "Let the floor become your map. From the entrance, count 16 tile rows along the marked hunt path.",
-    hint: "Count rows of tiles, not individual tiles. Ask an RIL host where to begin if needed.",
+    clue: "Let the floor become your map. Return to the start and retrace your steps for QR 08.",
+    hint: "Count 16 rows of tiles from the entrance along the marked route. Ask an RIL host if you need help counting.",
   },
   {
     clue: "Where names are checked and guests are welcomed, the next mark is waiting.",
