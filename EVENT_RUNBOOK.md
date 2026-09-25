@@ -5,7 +5,7 @@ This runbook connects the hunt app to fixed QR checkpoints at the RIL booth and 
 ## Before doors open
 
 - Deploy with Supabase configured; the in-memory demo store is not suitable for live leads or prize claims.
-- For an existing Supabase project, apply [`supabase/migrations/20260924_checkpoint_progress.sql`](supabase/migrations/20260924_checkpoint_progress.sql). For a new project, run the full [`supabase/schema.sql`](supabase/schema.sql).
+- For an existing Supabase project, apply the migrations in [`supabase/migrations`](supabase/migrations) in filename order. For a new project, run the full [`supabase/schema.sql`](supabase/schema.sql).
 - Set `NEXT_PUBLIC_BASE_URL` to the final HTTPS domain, then sign in to `/admin/qr` and print the 12-code sheet.
 - Place the codes in route order: QR 09 at the booth start; QR 01 at the entrance; QR 02 in the Daimayo area; QR 03 at AC 3; QR 04 stage left; QR 05 stage right; QR 06 below speaker 1; QR 07 at David's fixed station; QR 08 at the 16th tile row from the entrance; QR 10 at the registration table; QR 11 at Kelvin's fixed station; QR 12 at the booth finish.
 - Make QR 06 reachable without touching or climbing on speaker equipment. Mark the exact direction and tile-count starting edge for QR 08. Keep David's and Kelvin's QR signs fixed even if either host steps away.

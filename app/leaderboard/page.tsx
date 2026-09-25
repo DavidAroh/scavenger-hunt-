@@ -67,7 +67,7 @@ export default async function Leaderboard() {
         </Stagger>
       </div>
       <p className="mt-4 text-sm text-fog-400">
-        First {PRIZE.topN} finishers win {PRIZE.description}.
+        The fastest checkpoint route wins {PRIZE.description}.
         {PRIZE.raffleForAll ? " Every finisher receives a raffle entry; staff can add verified activity entries." : ""}
       </p>
     </Shell>

@@ -24,6 +24,7 @@ const toParticipant = (r: any): Participant => ({
   checkpointProgress: r.checkpoint_progress ?? 0,
   collected: r.collected ?? {},
   startedAt: r.started_at ?? null,
+  routeFinishedAt: r.route_finished_at ?? null,
   handle: r.handle ?? null,
   ageRange: r.age_range ?? null,
   role: r.role ?? null,
@@ -32,6 +33,7 @@ const toParticipant = (r: any): Participant => ({
 const toCompletion = (r: any): Completion => ({
   participantId: r.participant_id,
   finishedAt: r.finished_at,
+  routeFinishedAt: r.route_finished_at ?? r.finished_at,
   durationMs: r.duration_ms,
   claimCode: r.claim_code,
   claimedAt: r.claimed_at,
@@ -117,6 +119,7 @@ export const supabaseStore: Store = {
         {
           participant_id: c.participantId,
           finished_at: c.finishedAt,
+          route_finished_at: c.routeFinishedAt,
           duration_ms: c.durationMs,
           claim_code: c.claimCode,
         },
@@ -159,12 +162,12 @@ export const supabaseStore: Store = {
   async completionRank(participantId) {
     const mine = await this.getCompletion(participantId);
     if (!mine) return 0;
-    const { count, error } = await sb()
+    const { data, error } = await sb()
       .from("completions")
-      .select("participant_id", { count: "exact", head: true })
-      .lte("finished_at", mine.finishedAt);
+      .select("participant_id,duration_ms,route_finished_at,finished_at");
     if (error) throw new Error(error.message);
-    return count ?? 0;
+    const ranked = (data ?? []).sort((a, b) => a.duration_ms - b.duration_ms || a.route_finished_at.localeCompare(b.route_finished_at) || a.finished_at.localeCompare(b.finished_at) || a.participant_id.localeCompare(b.participant_id));
+    return ranked.findIndex((row) => row.participant_id === participantId) + 1;
   },
   async setProgress(participantId, stage, collected, startedAt) {
     // Only set started_at if not already set: fetch current, then update.
@@ -262,7 +265,7 @@ export const supabaseStore: Store = {
     return (rows ?? []).map(toParticipant);
   },
   async listCompletions() {
-    const rows = must(await sb().from("completions").select().order("finished_at")) as any[];
+    const rows = must(await sb().from("completions").select().order("duration_ms").order("route_finished_at").order("finished_at").order("participant_id")) as any[];
     return (rows ?? []).map(toCompletion);
   },
   async progressByParticipant() {

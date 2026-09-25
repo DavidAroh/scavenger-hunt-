@@ -83,7 +83,7 @@ export async function registerAction(_prev: GateState, fd: FormData): Promise<Ga
     wantsPrograms: values.wantsPrograms,
   });
   await setSession(sessionToken);
-  redirect("/play");
+  redirect("/play?scan=9");
 }
 
 export type PlayState = { error?: string; denied?: boolean; deniedHint?: string };

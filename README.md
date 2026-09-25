@@ -72,7 +72,7 @@ Try it: open `/`, register, then play the hunt. The event-ready answer key is in
 ## Go live
 
 1. **Configure the event.** Review `lib/config.ts`; add approved project details, event dates, bootcamp curriculum, ticket/merch URLs and exact prize inventory. Place the blue `7` on the booth. See [`EVENT_RUNBOOK.md`](EVENT_RUNBOOK.md).
-2. **Supabase** (required for real events): create a project and run [`supabase/schema.sql`](supabase/schema.sql). For an existing project, also run [`supabase/migrations/20260924_checkpoint_progress.sql`](supabase/migrations/20260924_checkpoint_progress.sql). RLS is on with no public policies; the app only talks to it server-side with the service-role key.
+2. **Supabase** (required for real events): create a project and run [`supabase/schema.sql`](supabase/schema.sql). For an existing project, apply the migrations in [`supabase/migrations`](supabase/migrations) in filename order. RLS is on with no public policies; the app only talks to it server-side with the service-role key.
 3. **Env** (`.env.local` / Vercel): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `SESSION_SECRET` (long random), `NEXT_PUBLIC_BASE_URL` (your live domain, no trailing slash).
 4. **Deploy** (Vercel works out of the box), open `/admin/qr`, **print the 12-code sheet**, and place each QR at its matching checkpoint.
 5. **Dry run** the full route on a couple of phones before doors open. Scan QR 09, then 01–08, 10–11, and 12; also try an out-of-order scan.

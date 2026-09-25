@@ -30,5 +30,5 @@ export async function scanCheckpointAction(token: string) {
     redirect(`/checkpoint/${token}?setup=1`);
   }
 
-  redirect("/play");
+  redirect(`/play?scan=${checkpoint.qrNumber}`);
 }

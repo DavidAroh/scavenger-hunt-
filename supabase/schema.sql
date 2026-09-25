@@ -21,6 +21,7 @@ create table if not exists participants (
   stage          integer not null default 0,
   collected      jsonb not null default '{}',
   started_at     timestamptz,
+  route_finished_at timestamptz,
   -- optional lead-capture fields:
   handle         text,
   age_range      text,
@@ -47,10 +48,12 @@ insert into hunt_checkpoints (id, qr_number, position, label) values
   ('speaker-1', 6, 6, 'Below speaker 1'),
   ('david', 7, 7, 'Find David'),
   ('tile-rows', 8, 8, '16 tile rows from the entrance'),
-  ('registration-table', 10, 9, 'Registration table'),
+  ('registration-table', 10, 9, 'VIP side (restricted area)'),
   ('kelvin', 11, 10, 'Find Kelvin'),
   ('booth-finish', 12, 11, 'Booth · Finish')
 on conflict (id) do nothing;
+
+update hunt_checkpoints set label = 'VIP side (restricted area)' where id = 'registration-table';
 
 revoke all on public.hunt_checkpoints from public, anon, authenticated;
 grant select on public.hunt_checkpoints to service_role;
@@ -80,6 +83,7 @@ alter table stage_events add column if not exists timeouts integer not null defa
 create table if not exists completions (
   participant_id uuid primary key references participants(id) on delete cascade,
   finished_at    timestamptz not null default now(),
+  route_finished_at timestamptz not null default now(),
   duration_ms    integer not null,
   claim_code     text not null unique,
   claimed_at     timestamptz
@@ -96,6 +100,10 @@ create table if not exists raffle_entries (
 create index if not exists completions_finished_idx on completions (finished_at);
 
 alter table participants enable row level security;
+alter table participants add column if not exists route_finished_at timestamptz;
+alter table completions add column if not exists route_finished_at timestamptz;
+update completions set route_finished_at = finished_at where route_finished_at is null;
+alter table completions alter column route_finished_at set not null;
 alter table stage_events enable row level security;
 alter table completions  enable row level security;
 alter table raffle_entries enable row level security;
@@ -135,7 +143,11 @@ begin
   end if;
 
   update participants
-     set checkpoint_progress = p_checkpoint_position
+     set checkpoint_progress = p_checkpoint_position,
+         route_finished_at = case
+           when p_checkpoint_position = 11 then coalesce(route_finished_at, now())
+           else route_finished_at
+         end
    where id = p_participant_id;
 
   return p_checkpoint_position;

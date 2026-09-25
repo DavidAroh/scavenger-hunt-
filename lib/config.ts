@@ -9,8 +9,8 @@ export const PRIZE = {
   description: "a bundle of comics + RIL merch",
   completionReward: "an RIL-branded completion item",
   rafflePrize: "a Nerd Work ticket and RIL merch bundle",
-  /** First N finishers win outright. */
-  topN: 20,
+  /** The single fastest checkpoint-route finisher wins outright. */
+  topN: 1,
   /** Every finisher gets one raffle entry in addition to any activity entries. */
   raffleForAll: true,
 };

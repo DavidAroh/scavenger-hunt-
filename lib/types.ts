@@ -19,6 +19,8 @@ export type Participant = {
   collected: Record<string, string>;
   /** Set when the player taps BEGIN THE HUNT; the duration clock starts here. */
   startedAt: string | null;
+  /** Time the final route QR was scanned; this stops the leaderboard race clock. */
+  routeFinishedAt: string | null;
   // ---- optional lead-capture fields (added to registration) ----
   handle: string | null;
   ageRange: string | null;
@@ -29,6 +31,8 @@ export type Participant = {
 export type Completion = {
   participantId: string;
   finishedAt: string;
+  /** Timestamp of the QR 12 scan used to rank the physical checkpoint route. */
+  routeFinishedAt: string;
   durationMs: number;
   claimCode: string;
   claimedAt: string | null;
@@ -55,7 +59,7 @@ export type Checkpoint = {
  */
 export type NewParticipant = Omit<
   Participant,
-  "id" | "createdAt" | "stage" | "checkpointProgress" | "collected" | "startedAt" | "handle" | "ageRange" | "role" | "wantsPrograms" | "marketingConsent"
+  "id" | "createdAt" | "stage" | "checkpointProgress" | "collected" | "startedAt" | "routeFinishedAt" | "handle" | "ageRange" | "role" | "wantsPrograms" | "marketingConsent"
 > &
   Partial<Pick<Participant, "handle" | "ageRange" | "role" | "wantsPrograms" | "marketingConsent">>;
 

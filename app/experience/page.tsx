@@ -64,7 +64,7 @@ export default function ExperiencePage() {
         <div className="mt-4 space-y-3">
           <article className="border-3 border-paper p-4"><p className="label text-green">Head-to-head</p><h3 className="mt-1 text-xl font-bold">RIL Versus</h3><p className="mt-2 text-sm text-fog-200">Challenge another attendee on the booth laptops. Staff will explain the game, manage the queue and announce each winner.</p></article>
           <article className="border-3 border-paper p-4"><p className="label text-green">Optional demo</p><h3 className="mt-1 text-xl font-bold">VR and creative tech</h3><p className="mt-2 text-sm text-fog-200">Check with the team for scheduled demonstrations and any available VR sessions.</p></article>
-          <article className="border-3 border-paper p-4"><p className="label text-green">Raffle</p><h3 className="mt-1 text-xl font-bold">Every completed hunt counts</h3><p className="mt-2 text-sm text-fog-200">Finish the hunt to receive a raffle entry. The fastest finishers may also qualify for the listed completion prizes.</p></article>
+          <article className="border-3 border-paper p-4"><p className="label text-green">Raffle</p><h3 className="mt-1 text-xl font-bold">Every completed hunt counts</h3><p className="mt-2 text-sm text-fog-200">Finish the hunt to receive a raffle entry. The fastest checkpoint route wins the completion prize.</p></article>
         </div>
       </section>
 

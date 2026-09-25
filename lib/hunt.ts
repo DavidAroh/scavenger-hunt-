@@ -85,10 +85,12 @@ async function finalize(p: Participant): Promise<FinishedResult> {
   for (let i = 0; i < 5 && (await store.getCompletionByCode(code)); i++) code = makeCode();
   const now = new Date();
   const startedAt = p.startedAt ?? p.createdAt;
+  const routeFinishedAt = p.routeFinishedAt ?? now.toISOString();
   const c = await store.createCompletion({
     participantId: p.id,
     finishedAt: now.toISOString(),
-    durationMs: Math.max(0, now.getTime() - new Date(startedAt).getTime()),
+    routeFinishedAt,
+    durationMs: Math.max(0, new Date(routeFinishedAt).getTime() - new Date(startedAt).getTime()),
     claimCode: code,
   });
   return finishedResult(p, c);

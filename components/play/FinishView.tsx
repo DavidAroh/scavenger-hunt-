@@ -52,7 +52,7 @@ export function FinishView({
         <BracketFrame tone={r.winner ? "green" : "blue"}>
           {r.winner ? (
             <p className="font-semibold text-lg leading-snug">
-              You finished in the top {prize.topN} and qualify for {prize.description}. You also get {prize.completionReward}{r.raffle ? ` and one entry in the ${prize.rafflePrize} raffle` : ""}.
+              You found all 12 checkpoint QR codes fastest and qualify for {prize.description}. You also get {prize.completionReward}{r.raffle ? ` and one entry in the ${prize.rafflePrize} raffle` : ""}.
             </p>
           ) : r.raffle ? (
             <p className="font-semibold text-lg leading-snug">

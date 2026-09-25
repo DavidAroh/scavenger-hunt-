@@ -47,6 +47,7 @@ export const memoryStore: Store = {
       checkpointProgress: 0,
       collected: {},
       startedAt: null,
+      routeFinishedAt: null,
       handle: p.handle ?? null,
       ageRange: p.ageRange ?? null,
       role: p.role ?? null,
@@ -110,7 +111,7 @@ export const memoryStore: Store = {
     return [...db.raffleEntries].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   },
   async completionRank(participantId) {
-    const sorted = [...db.completions.values()].sort((a, b) => a.finishedAt.localeCompare(b.finishedAt));
+    const sorted = [...db.completions.values()].sort((a, b) => a.durationMs - b.durationMs || a.routeFinishedAt.localeCompare(b.routeFinishedAt) || a.finishedAt.localeCompare(b.finishedAt) || a.participantId.localeCompare(b.participantId));
     return sorted.findIndex((c) => c.participantId === participantId) + 1;
   },
   async setProgress(participantId, stage, collected, startedAt) {
@@ -129,6 +130,7 @@ export const memoryStore: Store = {
       throw new Error("That is not the next checkpoint on your route.");
     }
     p.checkpointProgress = checkpointPosition;
+    if (checkpointPosition === 11 && !p.routeFinishedAt) p.routeFinishedAt = new Date().toISOString();
     return p;
   },
   async recordAttempt(participantId, stageId, solved) {
@@ -167,7 +169,7 @@ export const memoryStore: Store = {
     return [...db.participants.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
   async listCompletions() {
-    return [...db.completions.values()].sort((a, b) => a.finishedAt.localeCompare(b.finishedAt));
+    return [...db.completions.values()].sort((a, b) => a.durationMs - b.durationMs || a.routeFinishedAt.localeCompare(b.routeFinishedAt) || a.finishedAt.localeCompare(b.finishedAt) || a.participantId.localeCompare(b.participantId));
   },
   async progressByParticipant() {
     const out: Record<string, number> = {};

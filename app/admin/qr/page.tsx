@@ -27,7 +27,7 @@ export default async function QrSheet() {
     return (
       <div className="min-h-dvh bg-paper text-ink p-8">
         <h1 className="text-3xl font-bold">Checkpoint setup needed</h1>
-        <p className="mt-3">Run <code>supabase/migrations/20260924_checkpoint_progress.sql</code> in the Supabase SQL Editor, then reload this page.</p>
+        <p className="mt-3">Run the checkpoint and route-timer migrations in <code>supabase/migrations</code> in date order, then reload this page.</p>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default async function QrSheet() {
       <aside className="mt-8 border-2 border-ink p-4 text-sm print:hidden">
         <p className="font-bold">Route order</p>
         <p className="mt-1">QR 09 start → QR 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 10 → 11 → QR 12 finish.</p>
-        <p className="mt-2 text-fog-500">Apply <span className="font-mono">supabase/migrations/20260924_checkpoint_progress.sql</span> before testing checkpoint scans.</p>
+        <p className="mt-2 text-fog-500">Apply the checkpoint migrations in <span className="font-mono">supabase/migrations</span> before testing checkpoint scans.</p>
       </aside>
     </main>
   );

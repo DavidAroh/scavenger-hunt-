@@ -9,7 +9,7 @@ export const CHECKPOINT_LABELS = [
   "Below speaker 1",
   "Find David",
   "16 tile rows from the entrance",
-  "Registration table",
+  "VIP side (restricted area)",
   "Find Kelvin",
   "Booth · Finish",
 ] as const;
@@ -53,8 +53,8 @@ export const CHECKPOINT_CLUES = [
     hint: "Count 16 rows of tiles from the entrance along the marked route. Ask an RIL host if you need help counting.",
   },
   {
-    clue: "Where names are checked and guests are welcomed, the next mark is waiting.",
-    hint: "Find the registration table.",
+    clue: "Your next mark waits at the VIP side, where access is limited to invited guests.",
+    hint: "Stay outside the VIP area. Scan only the hunt QR sign at its public boundary.",
   },
   {
     clue: "One name is missing from your list: Kelvin. Find him to continue the trail.",

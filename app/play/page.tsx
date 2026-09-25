@@ -1,15 +1,17 @@
 import { Shell } from "@/components/Shell";
 import { StageRouter } from "@/components/play/StageRouter";
 import { QrScanner } from "@/components/play/QrScanner";
+import { RouteClock } from "@/components/play/RouteClock";
 import { PRIZE } from "@/lib/config";
 import { getGameState } from "@/lib/hunt";
 import { getParticipant } from "@/lib/session";
-import { isStorageReady } from "@/lib/store";
+import { isStorageReady, store } from "@/lib/store";
+import { CheckpointSuccess } from "@/components/play/CheckpointSuccess";
 
 export const dynamic = "force-dynamic";
 
 /** The booth QR starts registration; the route QR codes unlock later game stages. */
-export default async function PlayPage() {
+export default async function PlayPage({ searchParams }: { searchParams: Promise<{ scan?: string }> }) {
   if (!isStorageReady) {
     return (
       <Shell>
@@ -32,8 +34,16 @@ export default async function PlayPage() {
   }
 
   const state = await getGameState(me);
+  const params = await searchParams;
+  const scanNumber = Number(params.scan);
+  const lastCheckpoint = Number.isInteger(scanNumber) && scanNumber > 0
+    ? await store.getCheckpointByPosition(me.checkpointProgress)
+    : null;
+  const scanSuccess = lastCheckpoint?.qrNumber === scanNumber ? lastCheckpoint : null;
   return (
     <Shell>
+      {state.phase !== "finished" && me.startedAt && <RouteClock startedAt={me.startedAt} finishedAt={me.routeFinishedAt} />}
+      {scanSuccess && <CheckpointSuccess key={scanSuccess.qrNumber} qrNumber={scanSuccess.qrNumber} label={scanSuccess.label} />}
       <StageRouter
         state={state}
         firstName={me.name.split(" ")[0]}
